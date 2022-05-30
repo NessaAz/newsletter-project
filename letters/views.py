@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from .forms import NewsLetterForm
-from django.http import HttpResponse, Http404, HttpResponseRedirect
-import datetime as dt
+from .models import NewsLetterRecipients
+from django.http import HttpResponseRedirect
+from .email import send_welcome_email
 
 # Create your views here.
 def home(request):
@@ -10,8 +11,10 @@ def home(request):
         if form.is_valid():
             name = form.cleaned_data['your_name']
             email = form.cleaned_data['email']
-
-            HttpResponseRedirect('news_today')
+            recipient = NewsLetterRecipients(name = name,email =email)
+            recipient.save()
+            send_welcome_email(name,email)
+            HttpResponseRedirect('home')
     else:
         form = NewsLetterForm()
     return render(request, 'index.html')
